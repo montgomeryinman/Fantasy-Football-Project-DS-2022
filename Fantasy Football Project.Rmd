@@ -1,0 +1,28 @@
+---
+title: "Fantasy Football Project"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+library(tidyverse)
+rb = read_csv("RB_season.csv")
+str(rb)
+
+rb %>% ggplot(aes(x = Rank, y = RushingTD)) + geom_point()
+
+top30 = rb %>% filter(Rank <= 30) 
+
+top30 = top30 %>% mutate(PointsPerTouch = TotalPoints/TouchCarries)
+
+
+
+
+
+```
+
