@@ -20,9 +20,68 @@ top30 = rb %>% filter(Rank <= 30)
 
 top30 = top30 %>% mutate(PointsPerTouch = TotalPoints/TouchCarries)
 
+teamRunBlockWinRate = read_csv("Team Run Block Win Rate.csv")
 
 
+new = merge(rb, teamRunBlockWinRate, by = "Team")
 
+totalPointsVsRunWinRate = new %>% filter(Rank.x <= 24) %>% ggplot(aes( x = `Win Rate (%)`, y = TotalPoints, label = PlayerName)) + geom_point() + geom_text(hjust=0, vjust=0)
+
+totalPointsVsRunWinRate
 
 ```
+
+
+```{r}
+adp = read_csv("adp.csv")
+adp1 = adp %>% select(Player, Team, AVG) %>% rename(PlayerName = Player)
+
+rbADP = left_join(rb, adp1, by = "PlayerName")
+
+#Top 36 RB's based on total points 
+top36 = rbADP %>% filter(Rank <= 36)
+mean(top36$TotalPoints)
+top36 = top36 %>% mutate(Difference = (top36$TotalPoints - 186.8406))
+
+top36 %>% ggplot(aes(x = PlayerName, y = Difference)) + geom_bar(stat="identity") + coord_flip()
+
+#Top 36 draft picks 
+top36Picks = rbADP %>% filter(AVG <= 45.0)
+mean(top36Picks$TotalPoints)
+top36Picks = top36Picks %>% mutate(Difference = (top36Picks$TotalPoints - 155.854))
+
+top36Picks %>% mutate(PlayerName = fct_reorder(PlayerName, desc(AVG))) %>% ggplot(aes(x = PlayerName, y = Difference)) + geom_bar(stat="identity") + coord_flip()
+
+```
+
+
+```{r}
+airYards = read_csv("airYards.csv")
+names(airYards)
+
+airYardsRB = airYards %>% filter(Position == "RB") %>% select("Name", "Air Yards", "Average Depth of Target") %>% rename(PlayerName = Name)
+
+?left_join
+
+top36AirYards = left_join(top36, airYardsRB, by = "PlayerName")
+names(top36AirYards) 
+
+top36AirYards %>% ggplot(aes(x = get('Air Yards'), y = TotalPoints)) + geom_point()
+
+top36AirYards %>% mutate(PlayerName = fct_reorder(PlayerName, desc(AVG)))%>% ggplot(aes(x = get('Air Yards'), y = PlayerName)) + geom_bar(stat = 'identity') 
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
