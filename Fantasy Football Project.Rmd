@@ -12,23 +12,14 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(tidyverse)
 rb = read_csv("RB_season.csv")
-str(rb)
+rb %>% ggplot(aes(x = Rank, y = RushingTD)) + geom_point() + ggtitle("Rushing TD's vs Fantasy Rank of RB's") + geom_smooth(method='lm', se = FALSE)
 
-rb %>% ggplot(aes(x = Rank, y = RushingTD)) + geom_point()
-
-top30 = rb %>% filter(Rank <= 30) 
-
-top30 = top30 %>% mutate(PointsPerTouch = TotalPoints/TouchCarries)
 
 teamRunBlockWinRate = read_csv("Team Run Block Win Rate.csv")
 
-
 new = merge(rb, teamRunBlockWinRate, by = "Team")
 
-totalPointsVsRunWinRate = new %>% filter(Rank.x <= 24) %>% ggplot(aes( x = `Win Rate (%)`, y = TotalPoints, label = PlayerName)) + geom_point() + geom_text(hjust=0, vjust=0)
-
-totalPointsVsRunWinRate
-
+new %>% filter(Rank.x <= 24) %>% ggplot(aes( x = `Win Rate (%)`, y = TotalPoints, label = PlayerName)) + geom_point() + geom_text(hjust=0, vjust=0) + ggtitle("Fantasy Points vs Run Block Win Rate of Offensive Line") + geom_smooth(method='lm', se = FALSE)
 ```
 
 
@@ -43,38 +34,30 @@ top36 = rbADP %>% filter(Rank <= 36)
 mean(top36$TotalPoints)
 top36 = top36 %>% mutate(Difference = (top36$TotalPoints - 186.8406))
 
-top36 %>% ggplot(aes(x = PlayerName, y = Difference)) + geom_bar(stat="identity") + coord_flip()
-
 #Top 36 draft picks 
 top36Picks = rbADP %>% filter(AVG <= 45.0)
 mean(top36Picks$TotalPoints)
 top36Picks = top36Picks %>% mutate(Difference = (top36Picks$TotalPoints - 155.854))
 
-top36Picks %>% mutate(PlayerName = fct_reorder(PlayerName, desc(AVG))) %>% ggplot(aes(x = PlayerName, y = Difference)) + geom_bar(stat="identity") + coord_flip()
+top36Picks %>% mutate(PlayerName = fct_reorder(PlayerName, desc(AVG))) %>% ggplot(aes(x = PlayerName, y = Difference)) + geom_bar(stat="identity") + coord_flip() + ggtitle("RB's performance relative to an average RB (points)")
 
 ```
 
 
 ```{r}
-airYards = read_csv("airYards.csv")
-names(airYards)
-
-airYardsRB = airYards %>% filter(Position == "RB") %>% select("Name", "Air Yards", "Average Depth of Target") %>% rename(PlayerName = Name)
-
-?left_join
-
-top36AirYards = left_join(top36, airYardsRB, by = "PlayerName")
-names(top36AirYards) 
-
-top36AirYards %>% ggplot(aes(x = get('Air Yards'), y = TotalPoints)) + geom_point()
-
-top36AirYards %>% mutate(PlayerName = fct_reorder(PlayerName, desc(AVG)))%>% ggplot(aes(x = get('Air Yards'), y = PlayerName)) + geom_bar(stat = 'identity') 
-
+wr = read.csv("WR_season.csv")
+top10wr = read.csv("top10WR.csv")
+top10wrNew = top10wr %>% select(WEEK, PLAYER, FPTS)
+top10wrNew %>% ggplot(aes(x = FPTS)) + geom_histogram(bins = 11) + facet_wrap(~PLAYER) + geom_vline(aes(xintercept=mean(FPTS)),color="blue", linetype="dashed", size=1) 
 ```
 
 
+```{r}
+qb = read_csv("QB_season.csv")
+newQb = qb %>% filter(Rank <= 30) %>% mutate(Top15 = (Rank <= 15))
 
-
+newQb %>% ggplot(aes(x = Top15, y = RushingYDS, fill = Top15)) + geom_boxplot() +coord_flip() + ggtitle('Rushing yards for Top 30 QBs (seperated by Top 15 and Bottom 15 QBs)')
+```
 
 
 
