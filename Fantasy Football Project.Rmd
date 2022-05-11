@@ -12,36 +12,40 @@ knitr::opts_chunk$set(echo = TRUE)
 Group: Montgomery Inman
 Github: https://github.com/montgomeryinman/Fantasy-Football-Project-DS-2022
 
-*Introduction and Purpose*
-  Fantasy football is a very popular game, in which a "manager" drafts their own team of real NFL players who accumulate stats that equate to fantasy points. Fantasy football managers try to predict who will have great seasons and accumulate the most points, leading them to a championship. Selecting the best players at the start of the year during the draft is crucial in having a successful team. 
+### Introduction and Purpose 
+
+  Fantasy football is a very popular game, in which a "manager" drafts their own team of real NFL players who accumulate stats that equate to fantasy points. Fantasy football managers try to predict who will have great seasons and accumulate the most points, leading them to a championship. Selecting the best players at the start of the year during the draft is crucial in having a successful team.
 
   The purpose of my analysis was to analyze the 2021 fantasy football season in order to gain a better understanding of who the valuable players were last year and if the success of the individual players depends on the team surrounding them. This information could be useful for future drafts, helping managers pick the "correct" players. 
 
-*Outline of Data Sets*
+### Outline of Data Sets
+
   I used 3 main data sets for this project, each representing a different position in fantasy football (NFL) (Quarterback, Running Back, and Wide Receiver). Each data set contains different statisitcs pertaining to that position group. The running back data set contains statistics on 234 running backs, the wide receiver contains stats on 370 wide receivers, and the quarterback data set contains information on 130 quarterbacks. I also added a supplemental data sets to help with my analsis including a data set that includes the run block win % rate (this measures the success of the offensive line of a team) and a data set that includes the average draft position of the player (ADP).
 
 
-	**Analysis**
+## Analysis
 	
-	*Observing Running Back Data*
+### *Observing Running Back Data*
 	
-	The purpose of this analysis was to visualize different aspects that influence a running back's final ranking based on fantasy points. We can see from the "Rushing TD's vs Fantasy Rank of RB's" scatter plot that there is a clear relationship between how many touchdowns a running back obtains and their final ranking. 
-	Also, I was curious to see how the strength of a team's offensive line is related to the total fantasy points of the top 24 running backs. This scatterplot shows that there is barely any affect on a running back's total points and the strength of their offensive line. Yet, we can still make observations like Najee Harris performed very well given his weak offensive line.
+	
+	
 
 ```{r}
 library(tidyverse)
 rb = read_csv("RB_season.csv")
-rb %>% ggplot(aes(x = Rank, y = RushingTD)) + geom_point() + ggtitle("Rushing TD's vs Fantasy Rank of RB's") + geom_smooth(method='lm', se = FALSE)
+rb %>% ggplot(aes(x = Rank, y = RushingTD)) + geom_point() + ggtitle("Rushing TD's vs Fantasy Rank of RB's (figure 1)") + geom_smooth(method='lm', se = FALSE)
 
 
 teamRunBlockWinRate = read_csv("Team Run Block Win Rate.csv")
 
 new = merge(rb, teamRunBlockWinRate, by = "Team")
 
-new %>% filter(Rank.x <= 24) %>% ggplot(aes( x = `Win Rate (%)`, y = TotalPoints, label = PlayerName)) + geom_point() + geom_text(hjust=0, vjust=0) + ggtitle("Fantasy Points vs Run Block Win Rate of Offensive Line") + geom_smooth(method='lm', se = FALSE)
+new %>% filter(Rank.x <= 24) %>% ggplot(aes( x = `Win Rate (%)`, y = TotalPoints, label = PlayerName)) + geom_point() + geom_text(hjust=0, vjust=0) + ggtitle("Fantasy Points vs Run Block Win Rate of Offensive Line (figure 2)") + geom_smooth(method='lm', se = FALSE)
 ```
+**The purpose of this analysis (figure 1) was to visualize different aspects that influence a running back's final ranking based on fantasy points. We can see from the "Rushing TD's vs Fantasy Rank of RB's" scatter plot that there is a clear relationship between how many touchdowns a running back obtains and their final ranking.** 
+	**Also, I was curious to see how the strength of a team's offensive line is related to the total fantasy points of the top 24 running backs. This scatterplot (figure 2) shows that there is barely any affect on a running back's total points and the strength of their offensive line. Yet, we can still make observations like Najee Harris performed very well given his weak offensive line.**
 
-For this analysis, I added the ADP data set to help explore the average draft position of the running backs compared with how they performed vs the average running back. The average running back had a total point total of 186.8406, so the bar chart is showing the difference between the running backs total points and the average. The players at the top are the players who were taken in fantasy drafts earlier. So Christian McCaffrey was, on average, the first running back chose in drafts, yet he underperformed but a good amount compared to an average running back. Yet, a player like James Connor drastically outperformed his draft spot as he performed a lot better than the average running back. 
+  
 
 ```{r}
 adp = read_csv("adp.csv")
@@ -59,29 +63,40 @@ top36Picks = rbADP %>% filter(AVG <= 45.0)
 mean(top36Picks$TotalPoints)
 top36Picks = top36Picks %>% mutate(Difference = (top36Picks$TotalPoints - 155.854))
 
-top36Picks %>% mutate(PlayerName = fct_reorder(PlayerName, desc(AVG))) %>% ggplot(aes(x = PlayerName, y = Difference)) + geom_bar(stat="identity") + coord_flip() + ggtitle("RB's performance relative to an average RB (points)")
+top36Picks %>% mutate(PlayerName = fct_reorder(PlayerName, desc(AVG))) %>% ggplot(aes(x = PlayerName, y = Difference)) + geom_bar(stat="identity") + coord_flip() + ggtitle("RB's performance relative to an average RB (points) (figure 3)")
 
 ```
-*Observing Wide Receiver's*
 
-  For this analysis I compiled the data of the top 10 wide receivers in fantasy football, and created histograms (facetted by Player Name) to explore the distribution of a players fantasy points by week. The blue dashed line represents the mean total points for a top 10 wide receiver. We can see that players like Tyreek Hill and Mike Williams have a rightly skewed histogram with some outliers on the larger side. This shows that although these players were in the top 10, they had a large amount of games that were less than the mean. A player like Cooper Kupp or Davante Adams or Deebo Samuel has a more symmetric histogram showing their consistency.  
+
+  **For this analysis (figure 3), I added the ADP data set to help explore the average draft position of the running backs compared with how they performed vs the average running back. The average running back had a total point total of 186.8406, so the bar chart is showing the difference between the running backs total points and the average. The players at the top are the players who were taken in fantasy drafts earlier. So Christian McCaffrey was, on average, the first running back chose in drafts, yet he underperformed but a good amount compared to an average running back. Yet, a player like James Connor drastically outperformed his draft spot as he performed a lot better than the average running back.** 
+
+  
+  
 
 ```{r}
 wr = read.csv("WR_season.csv")
 top10wr = read.csv("top10WR.csv")
 top10wrNew = top10wr %>% select(WEEK, PLAYER, FPTS)
-top10wrNew %>% ggplot(aes(x = FPTS)) + geom_histogram(bins = 11) + facet_wrap(~PLAYER) + geom_vline(aes(xintercept=mean(FPTS)),color="blue", linetype="dashed", size=1) 
+top10wrNew %>% ggplot(aes(x = FPTS)) + geom_histogram(bins = 11) + facet_wrap(~PLAYER) + geom_vline(aes(xintercept=mean(FPTS)),color="blue", linetype="dashed", size=1) + ggtitle("(figure 4)")
 ```
-*Observing Quarterback Data*
-  For this analysis I observed the top 30 fantasy quarterbacks, and seperated them into 2 groups (top 15 and bottom 15). I wanted to explore the affect that rushing yards has on a quarterback's finish in the rankings. We can see that a top 15 quarterback on average has more rushing yards then the next 15 quarterbacks. So it may be advantageous the draft a quarterback that can rush as well as pass.
+
+
+
+### *Observing Wide Receiver's*
+  **For this analysis (figure 4) I compiled the data of the top 10 wide receivers in fantasy football, and created histograms (facetted by Player Name) to explore the distribution of a players fantasy points by week. The blue dashed line represents the mean total points for a top 10 wide receiver. We can see that players like Tyreek Hill and Mike Williams have a rightly skewed histogram with some outliers on the larger side. This shows that although these players were in the top 10, they had a large amount of games that were less than the mean. A player like Cooper Kupp or Davante Adams or Deebo Samuel has a more symmetric histogram showing their consistency.**
+
+  
 
 ```{r}
 qb = read_csv("QB_season.csv")
 newQb = qb %>% filter(Rank <= 30) %>% mutate(Top15 = (Rank <= 15))
 
-newQb %>% ggplot(aes(x = Top15, y = RushingYDS, fill = Top15)) + geom_boxplot() +coord_flip() + ggtitle('Rushing yards for Top 30 QBs (seperated by Top 15 and Bottom 15 QBs)')
+newQb %>% ggplot(aes(x = Top15, y = RushingYDS, fill = Top15)) + geom_boxplot() +coord_flip() + ggtitle('Rushing yards for Top 30 QBs (seperated by Top 15 and next 15 QBs) (figure 5)')
 ```
+  
+### *Observing Quarterback Data*
 
+  **For this analysis (figure 5) I observed the top 30 fantasy quarterbacks, and seperated them into 2 groups (top 15 and bottom 15). I wanted to explore the affect that rushing yards has on a quarterback's finish in the rankings. We can see that a top 15 quarterback on average has more rushing yards then the next 15 quarterbacks. So it may be advantageous the draft a quarterback that can rush as well as pass.**
 
 
 
